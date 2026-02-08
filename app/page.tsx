@@ -1,9 +1,6 @@
 'use client';
-// src/app/page.tsx start cd C:\Users\GIDEON\my-fuliza-analysis
-//npm run dev
-//git add .
-//git commit -m "your descriptive message here"
-//git push
+
+// src/app/page.tsx
 import React from 'react';
 
 function formatKsh(amount: number): string {
@@ -54,29 +51,27 @@ export default function FulizaBoostPage() {
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
   const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
 
-  // Remove the random init from useState
-const [recentIncrease, setRecentIncrease] = React.useState({
-  phone: '07XX****XX', // placeholder (shows during SSR)
-  amount: 0,
-});
-
-// Generate real random values ONLY after mount (client-only)
-React.useEffect(() => {
-  setRecentIncrease({
-    phone: generateMaskedPhone(),
-    amount: limits[randomInt(0, limits.length - 1)]?.amount ?? 16400,
+  // Safe initial state to avoid hydration mismatch
+  const [recentIncrease, setRecentIncrease] = React.useState({
+    phone: '07XX****XX',
+    amount: 0,
   });
 
-  // Also start the interval here
-  const interval = setInterval(() => {
+  React.useEffect(() => {
     setRecentIncrease({
       phone: generateMaskedPhone(),
       amount: limits[randomInt(0, limits.length - 1)]?.amount ?? 16400,
     });
-  }, 2000);
 
-  return () => clearInterval(interval);
-}, [limits]); // ← dependency on limits
+    const interval = setInterval(() => {
+      setRecentIncrease({
+        phone: generateMaskedPhone(),
+        amount: limits[randomInt(0, limits.length - 1)]?.amount ?? 16400,
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [limits]);
 
   const fee = selectedOption?.fee ?? 0;
   const isValid = idNumber.trim().length > 3 && phoneNumber.replace(/\D/g, '').length >= 9;
@@ -102,6 +97,8 @@ React.useEffect(() => {
       apiRef: idNumber.trim() || `ref-${Date.now()}`,
     };
 
+    console.log('Sending payload to API:', payload); // ← Debug in browser console
+
     setLoading(true);
 
     try {
@@ -111,14 +108,17 @@ React.useEffect(() => {
         body: JSON.stringify(payload),
       });
 
+      console.log('API response status:', res.status); // ← Debug
+
       const data = await res.json();
 
       if (!res.ok || !data?.ok) {
-        throw new Error(data?.error || 'Failed to initiate STK push');
+        throw new Error(data?.error || `Failed with status ${res.status}`);
       }
 
       setSuccessMsg('STK push sent. Please check your phone to complete payment.');
     } catch (err: any) {
+      console.error('Fetch error:', err); // ← Debug
       setErrorMsg(err.message || 'An error occurred');
     } finally {
       setLoading(false);
@@ -237,7 +237,6 @@ React.useEffect(() => {
             </span>
             Secure
           </div>
-
           <div className="flex items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 text-[11px] text-slate-600 shadow-sm ring-1 ring-slate-200">
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-100 text-sky-700">
               <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
@@ -247,7 +246,6 @@ React.useEffect(() => {
             </span>
             Encrypted
           </div>
-
           <div className="flex items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 text-[11px] text-slate-600 shadow-sm ring-1 ring-slate-200">
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-100 text-sky-700">
               <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
@@ -257,7 +255,6 @@ React.useEffect(() => {
             </span>
             Instant
           </div>
-
           <div className="flex items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 text-[11px] text-slate-600 shadow-sm ring-1 ring-slate-200">
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-100 text-sky-700">
               <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
@@ -277,7 +274,6 @@ React.useEffect(() => {
               onClick={handleCloseModal}
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
-
             <div className="relative w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl ring-1 ring-slate-200">
               <div className="flex flex-col items-center">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-sky-200 text-sky-500">
