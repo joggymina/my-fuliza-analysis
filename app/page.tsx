@@ -1,7 +1,9 @@
 'use client';
 // src/app/page.tsx start cd C:\Users\GIDEON\my-fuliza-analysis
 //npm run dev
-
+//git add .
+//git commit -m "your descriptive message here"
+//git push
 import React from 'react';
 
 function formatKsh(amount: number): string {
