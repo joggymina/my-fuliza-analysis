@@ -1,6 +1,4 @@
-// src/app/api/stk-push/route.ts
-// (you can keep this path or rename the folder to /api/payhero-stk if you prefer)
-
+// src/app/api/payhero-stk/route.ts - Real PayHero
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -8,84 +6,47 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { phone, amount, apiRef } = body;
 
-    // Validate required fields from frontend
     if (!phone || !amount || !apiRef) {
-      return NextResponse.json(
-        { ok: false, error: 'Missing phone, amount, or apiRef' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
-    // Normalize phone to international format (2547xxxxxxxx)
-    let normalizedPhone = phone.replace(/\D/g, ''); // remove non-digits
-    if (normalizedPhone.startsWith('0')) {
-      normalizedPhone = `254${normalizedPhone.slice(1)}`;
-    }
-    if (!normalizedPhone.startsWith('254')) {
-      normalizedPhone = `254${normalizedPhone}`;
-    }
+    let normalizedPhone = phone.replace(/\D/g, '');
+    if (normalizedPhone.startsWith('0')) normalizedPhone = `254${normalizedPhone.slice(1)}`;
+    if (!normalizedPhone.startsWith('254')) normalizedPhone = `254${normalizedPhone}`;
 
-    console.log('=== PAYHERO STK PUSH REQUEST ===');
-    console.log('Received payload:', JSON.stringify(body, null, 2));
-    console.log('Normalized phone:', normalizedPhone);
-
-    // Prepare PayHero payload
-    const payheroPayload = {
+    const payload = {
       amount: Number(amount),
       phone_number: normalizedPhone,
-      channel_id: Number(process.env.PAYHERO_CHANNEL_ID), // your channel ID from dashboard
+      channel_id: Number(process.env.PAYHERO_CHANNEL_ID),
       provider: 'm-pesa',
-      external_reference: apiRef || `ref-${Date.now()}`,
-      customer_name: 'Fuliza Analysis User', // optional, can be dynamic
-      callback_url: 'https://my-fuliza-analysis.vercel.app/api/payhero-callback', // your live callback
+      external_reference: apiRef,
+      customer_name: 'Test User',
+      callback_url: 'https://my-fuliza-analysis.vercel.app/api/payhero-callback',
     };
 
-    console.log('Sending to PayHero:', payheroPayload);
+    console.log('Sending to PayHero:', payload);
 
-    // Make the real request to PayHero
-    const response = await fetch('https://backend.payhero.co.ke/api/v2/payments', {
+    const res = await fetch('https://backend.payhero.co.ke/api/v2/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${process.env.PAYHERO_BASIC_AUTH_TOKEN}`, // ← this fixes Unauthorized
+        'Authorization': `Basic ${process.env.PAYHERO_BASIC_AUTH_TOKEN}`,
       },
-      body: JSON.stringify(payheroPayload),
+      body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
+    const data = await res.json();
 
-    // Log full response for debugging
-    console.log('PayHero response status:', response.status);
-    console.log('PayHero response body:', JSON.stringify(data, null, 2));
+    console.log('PayHero status:', res.status);
+    console.log('PayHero body:', data);
 
-    if (!response.ok) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: data?.message || 'PayHero request failed',
-          status: response.status,
-          details: data,
-        },
-        { status: response.status }
-      );
+    if (!res.ok) {
+      return NextResponse.json({ error: data?.message || 'PayHero failed' }, { status: res.status });
     }
 
-    // Success
-    return NextResponse.json({
-      ok: true,
-      message: 'STK push initiated successfully',
-      reference: data?.reference || 'N/A',
-      raw: data,
-    });
-  } catch (error: any) {
-    console.error('PayHero STK Push route error:', error.message || error);
-    return NextResponse.json(
-      {
-        ok: false,
-        error: error.message || 'Internal server error',
-        details: error.stack || 'No stack trace',
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: true, message: 'STK push sent', data });
+  } catch (err) {
+    console.error('Error:', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
-} 
+}
