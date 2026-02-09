@@ -12,7 +12,7 @@ function randomInt(min: number, max: number): number {
 }
 
 function generateMaskedPhone(): string {
-  const prefix = `07${randomInt(0, 1, 2, 4, 6, 9)}`;
+  const prefix = `07${randomInt(0, 4)}`;
   const suffix = `${randomInt(0, 9)}${randomInt(0, 9)}`;
   return `${prefix}${randomInt(0, 9)}****${suffix}`;
 }
