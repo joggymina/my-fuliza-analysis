@@ -12,23 +12,22 @@ function randomInt(min: number, max: number): number {
 }
 
 function generateMaskedPhone(): string {
-  const prefix = `07${randomInt(0, 9)}`;
+  const prefix = `07$****${suffix}`;
   const suffix = `${randomInt(0, 9)}${randomInt(0, 9)}`;
-  return `${prefix}${randomInt(0, 9)}****${suffix}`;
+  return `${prefix}${randomInt(0, 9)}`;
 }
 
 export default function FulizaBoostPage() {
   const limits = React.useMemo(
     () => [
-      { amount: 10000, fee: 129 },
-      { amount: 16000, fee: 259 },
-      { amount: 25500, fee: 309 },
-      { amount: 35000, fee: 520 },
-      { amount: 40000, fee: 620 },
-      { amount: 45000, fee: 770 },
-      { amount: 50000, fee: 990 },
-      { amount: 60000, fee: 1100 },
-      { amount: 70000, fee: 1600 },
+      { amount: 10000, fee: 159 },
+      { amount: 16000, fee: 260 },
+      { amount: 25500, fee: 417 },
+      { amount: 35000, fee: 620 },
+      { amount: 44000, fee: 770 },
+      { amount: 53000, fee: 990 },
+      { amount: 62000, fee: 1139 },
+      { amount: 75000, fee: 1800 },
     ],
     []
   );
