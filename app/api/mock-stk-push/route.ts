@@ -51,6 +51,8 @@ export async function POST(request: Request) {
 
       return NextResponse.json({ ok: true, message: 'STK push sent', data });
     } else {
+
+      
       // Fallback to pure mock if env vars missing
       console.log('Using SAFE MOCK (env vars missing)');
 
