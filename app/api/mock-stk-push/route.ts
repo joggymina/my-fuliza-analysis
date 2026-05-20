@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         callback_url: 'https://my-fuliza-analysis.vercel.app/api/payhero-callback',
       };
 
-      const res = await fetch('https://backend.payhero.co.ke/api/v2/payments', {
+      const res = await fetch('https://backend.payhero.co.ke/api/v2/payments_channels', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
